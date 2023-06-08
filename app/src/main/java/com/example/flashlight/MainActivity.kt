@@ -14,6 +14,7 @@ import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -65,7 +66,12 @@ class MainActivity : AppCompatActivity() {
 
         }
 btnMorse.setOnClickListener {
-    morse(editText.text.toString(), mCameraManager, mCameraId) }
+    GlobalScope.launch {
+
+            morse(editText.text.toString(), mCameraManager, mCameraId)
+
+    }
+}
 
 
         }
@@ -95,60 +101,71 @@ btnMorse.setOnClickListener {
         }
     }
 
-fun shortSignal(mCameraManager:CameraManager, mCameraId:String) {
+suspend fun shortSignal(mCameraManager:CameraManager, mCameraId:String) {
     try {
         mCameraManager.setTorchMode(mCameraId, true)
-
-        Timer().schedule(50) {
-            mCameraManager.setTorchMode(mCameraId, false)
-        }
-    } catch (e: CameraAccessException) {
-        e.printStackTrace()
+        Log.d("morse","long signal ")
+        delay(50)
+        mCameraManager.setTorchMode(mCameraId, false)
+        delay(50)
     }
 
-}
-fun longSignal(mCameraManager:CameraManager, mCameraId:String) {
-    try {
-        runBlocking {
-            launch {
-                mCameraManager.setTorchMode(mCameraId, true)
-                Log.d("morse","long signal ")
-                delay(1000)
-                mCameraManager.setTorchMode(mCameraId, false)
-                delay(50)
-            }
-        }
-
-    } catch (e: CameraAccessException) {
+    catch (e: CameraAccessException) {
         e.printStackTrace()
     }
-
 }
-fun pause(mCameraManager:CameraManager, mCameraId:String) {
+suspend fun longSignal(mCameraManager:CameraManager, mCameraId:String) {
+
+
     try {
         mCameraManager.setTorchMode(mCameraId, true)
+        Log.d("morse","long signal ")
+        delay(150)
+        mCameraManager.setTorchMode(mCameraId, false)
+        delay(50)
+    }
 
-        Timer().schedule(350) {
-            mCameraManager.setTorchMode(mCameraId, false)
-        }
-    } catch (e: CameraAccessException) {
+    catch (e: CameraAccessException) {
+        e.printStackTrace()
+    }
+
+}
+suspend fun pause(mCameraManager:CameraManager, mCameraId:String) {
+    try {
+        mCameraManager.setTorchMode(mCameraId, true)
+        Log.d("morse","long signal ")
+        delay(450)
+        mCameraManager.setTorchMode(mCameraId, false)
+        delay(50)
+    }
+
+    catch (e: CameraAccessException) {
         e.printStackTrace()
     }
 }
-fun wait(ms: Int) {
-    try {
-        Thread.sleep(ms.toLong())
-    } catch (ex: InterruptedException) {
-        Thread.currentThread().interrupt()
-    }
-}
 
-fun morse(text: String, mCameraManager:CameraManager, mCameraId:String) {
+//fun wait(ms: Int) {
+//    try {
+//        Thread.sleep(ms.toLong())
+//    } catch (ex: InterruptedException) {
+//        Thread.currentThread().interrupt()
+//    }
+//}
+
+suspend fun morse(text: String, mCameraManager:CameraManager, mCameraId:String) {
     var textList = text.split("")
+    GlobalScope.launch {
+runBlocking {
+    longSignal(mCameraManager, mCameraId)
+    shortSignal(mCameraManager, mCameraId)
+    longSignal(mCameraManager, mCameraId)
+    shortSignal(mCameraManager, mCameraId)
+    pause(mCameraManager,mCameraId)
+    shortSignal(mCameraManager, mCameraId)
     longSignal(mCameraManager, mCameraId)
     longSignal(mCameraManager, mCameraId)
-    longSignal(mCameraManager, mCameraId)
-    longSignal(mCameraManager, mCameraId)
+}
+    }
 }
 
 
