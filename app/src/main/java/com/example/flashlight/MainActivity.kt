@@ -144,26 +144,34 @@ suspend fun pause(mCameraManager:CameraManager, mCameraId:String) {
     }
 }
 
-//fun wait(ms: Int) {
-//    try {
-//        Thread.sleep(ms.toLong())
-//    } catch (ex: InterruptedException) {
-//        Thread.currentThread().interrupt()
-//    }
-//}
-
 suspend fun morse(text: String, mCameraManager:CameraManager, mCameraId:String) {
-    var textList = text.split("")
+    val textList = text.split("")
+
+
+
     GlobalScope.launch {
 runBlocking {
-    longSignal(mCameraManager, mCameraId)
-    shortSignal(mCameraManager, mCameraId)
-    longSignal(mCameraManager, mCameraId)
-    shortSignal(mCameraManager, mCameraId)
-    pause(mCameraManager,mCameraId)
-    shortSignal(mCameraManager, mCameraId)
-    longSignal(mCameraManager, mCameraId)
-    longSignal(mCameraManager, mCameraId)
+    for (i in 1..text.length){
+        if (textList[i] == " ") {
+            pause(mCameraManager,mCameraId) }
+
+        for (l in letters.indices) {
+            if (textList[i] == letters[l].toString()) {
+            var signal = signals[l].toString().split("")
+                for (s in signal.indices){
+                    when{
+                        signal[s] == "." -> shortSignal(mCameraManager,mCameraId)
+                        signal[s] == "-" -> longSignal(mCameraManager,mCameraId)
+
+                    }
+                }
+
+            }
+        }
+    }
+
+
+
 }
     }
 }
